@@ -11,12 +11,15 @@ from scrapy.exceptions import DropItem
 from mzitu.settings import IMAGES_STORE
 import os
 import requests
+import re
 
 class MzituPipeline(ImagesPipeline):
 
 
     def process_item(self, item, spider):
-        dir_path = '%s/%s/%s' % (IMAGES_STORE, spider.name,item["mzi_name"])  # 存储路径
+        title = item["mzi_name"]
+        name = re.sub('[\/:*?"<>|]','-',title)
+        dir_path = '%s/%s/%s' % (IMAGES_STORE, spider.name,name)  # 存储路径
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
         image_link = item['mzi_image']
