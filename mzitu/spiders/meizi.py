@@ -51,14 +51,41 @@ class MeiziSpider(scrapy.Spider):
         imageurl = response.xpath('//div[@class="main-image"]/p/a/img/@src').extract()[0]
         imagelist = response.xpath('//div[@class="pagenavi"]/a/span/text()').extract()[-2]
         url_src = ''
-        for i in range(1,int(imagelist)+1):
-            if i == 1:
-                url_src = item_detail["mzi_link"]
-            else:
-                url_src = '%s/%s' % (item_detail["mzi_link"], str(i))
+        file_name_type = imageurl.split('/')
+        file_name = file_name_type[len(file_name_type) - 1]
+        print('%s---------%s',file_name,len(file_name))
+        if len(file_name) <= 9 and file_name.index('01.jpg') > -1 :
+            baseURl = imageurl.split('01.jpg')[0]
+            image_src = ''
+            item = MzituItem()
+            for i in range(1, int(imagelist) + 1):
+                if i == 1:
+                    item["mzi_index"] = 0
+                else:
+                    item['mzi_index'] = i - 1
+                if i < 10:
+                    image_src = baseURl + '0' + str(i) + '.jpg'
+                else:
+                    image_src = baseURl + str(i) + '.jpg'
+                item["mzi_name"] = item_detail["mzi_name"]
+                item["mzi_link"] = item_detail["mzi_link"]
+                item["mzi_time"] = item_detail["mzi_time"]
+                item["mzi_view"] = item_detail["mzi_view"]
+                item["mzi_image"] = image_src
 
-            #print(url_src)
-            yield scrapy.Request(url_src,meta={"item": item_detail,"current":str(i)}, callback=self.parse_get_image)
+                yield item
+        else:
+            for i in range(1, int(imagelist) + 1):
+                if i == 1:
+                    url_src = item_detail["mzi_link"]
+                else:
+                    url_src = '%s/%s' % (item_detail["mzi_link"], str(i))
+
+                # print(url_src)
+                yield scrapy.Request(url_src, meta={"item": item_detail, "current": str(i)},
+                                     callback=self.parse_get_image)
+
+
 
 
     def parse_get_image(self,response):

@@ -23,13 +23,13 @@ class MzituPipeline(ImagesPipeline):
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
         image_link = item['mzi_image']
-        str1 = item['mzi_index']
-        if int(str1) == 0 :
-            str1 = item['mzi_link']
-        else:
-            str1 = "%s/%s" % (item['mzi_link'] , item['mzi_index'])
+        # str1 = item['mzi_index']
+        # if int(str1) == 0 :
+        #     str1 = item['mzi_link']
+        # else:
+        #     str1 = "%s/%s" % (item['mzi_link'] , item['mzi_index'])
         headers = {
-            "Referer": str1,
+            "Referer": item['mzi_link'],
 
         }
         list_name = image_link.split('/')
