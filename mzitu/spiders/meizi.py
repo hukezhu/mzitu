@@ -19,6 +19,8 @@ class MeiziSpider(scrapy.Spider):
                 url = "http://www.mzitu.com"
             else:
                 url = baseURl + str(i) + '/'
+            print('**********************************%s*****************************************' % url)
+
             yield scrapy.Request(url, callback=self.parse_next)
 
 
@@ -44,31 +46,37 @@ class MeiziSpider(scrapy.Spider):
             yield scrapy.Request(item["mzi_link"], meta={"item": item}, callback=self.parse_detail)
 
     def parse_detail(self,response):
+
         item_detail = response.meta["item"]
+        #print('-------------------------%s\n\n\n' % item_detail["mzi_link"])
         imageurl = response.xpath('//div[@class="main-image"]/p/a/img/@src').extract()[0]
         imagelist = response.xpath('//div[@class="pagenavi"]/a/span/text()').extract()[-2]
 
-
-
+        #print('-------------------------%s\n\n\n'%imageurl)
         baseURl = imageurl.split('01.jpg')[0]
         index = int(imagelist)
-        image_src = ''
+        url_src = ''
         for i in range(1,index):
-            if i < 10 :
-                image_src = baseURl + '0' + str(i) + '.jpg'
+            if i == 1 :
+                url_src = item_detail["mzi_link"]
             else:
-                image_src = baseURl + str(i) + '.jpg'
+                url_src = '%s/%s'%(item_detail["mzi_link"],str(i))
+            yield scrapy.Request(url_src,meta={"item": item_detail,"current":str(i)},callback=self.parse_get_image)
 
-            item = MzituItem()
-            item["mzi_name"] = item_detail["mzi_name"]
-            item["mzi_link"] = item_detail["mzi_link"]
-            item["mzi_time"] = item_detail["mzi_time"]
-            item["mzi_view"] = item_detail["mzi_view"]
-            item["mzi_image"] = image_src
-            if i == 1:
-                item['mzi_index'] = 0
-            else:
-                item['mzi_index'] = i - 1
 
-            yield item
+    def parse_get_image(self,response):
+        item_detail = response.meta["item"]
+        current = int(response.meta["current"])
+        imageurl = response.xpath('//div[@class="main-image"]/p/a/img/@src').extract()[0]
 
+        item = MzituItem()
+        item["mzi_name"] = item_detail["mzi_name"]
+        item["mzi_link"] = item_detail["mzi_link"]
+        item["mzi_time"] = item_detail["mzi_time"]
+        item["mzi_view"] = item_detail["mzi_view"]
+        item["mzi_image"] = imageurl
+        if current == 1:
+            item['mzi_index'] = 0
+        else:
+            item['mzi_index'] = current - 1
+        yield item

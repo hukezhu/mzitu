@@ -73,7 +73,7 @@ ITEM_PIPELINES = {
    'mzitu.pipelines.MzituPipeline': 300,
 }
 
-IMAGES_STORE = '/Users/hukezhu/Desktop/scrapy/'
+IMAGES_STORE = '/Users/hukezhu/Desktop/scrapy'
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
