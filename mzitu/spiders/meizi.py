@@ -14,7 +14,7 @@ class MeiziSpider(scrapy.Spider):
         pagesize = response.xpath('//div[@class="nav-links"]/a/text()').extract()[-2]
         baseURl = "http://www.mzitu.com/page/"
         url = ' '
-        for i in range(1,int(pagesize)):
+        for i in range(1,int(pagesize)+1):
             if i == 1:
                 url = "http://www.mzitu.com"
             else:
@@ -48,27 +48,25 @@ class MeiziSpider(scrapy.Spider):
     def parse_detail(self,response):
 
         item_detail = response.meta["item"]
-        #print('-------------------------%s\n\n\n' % item_detail["mzi_link"])
         imageurl = response.xpath('//div[@class="main-image"]/p/a/img/@src').extract()[0]
         imagelist = response.xpath('//div[@class="pagenavi"]/a/span/text()').extract()[-2]
-
-        #print('-------------------------%s\n\n\n'%imageurl)
-        baseURl = imageurl.split('01.jpg')[0]
-        index = int(imagelist)
         url_src = ''
-        for i in range(1,index):
-            if i == 1 :
+        for i in range(1,int(imagelist)+1):
+            if i == 1:
                 url_src = item_detail["mzi_link"]
             else:
-                url_src = '%s/%s'%(item_detail["mzi_link"],str(i))
-            yield scrapy.Request(url_src,meta={"item": item_detail,"current":str(i)},callback=self.parse_get_image)
+                url_src = '%s/%s' % (item_detail["mzi_link"], str(i))
+
+            #print(url_src)
+            yield scrapy.Request(url_src,meta={"item": item_detail,"current":str(i)}, callback=self.parse_get_image)
 
 
     def parse_get_image(self,response):
+        #print('11111111111111111111111111111111'+response.url)
         item_detail = response.meta["item"]
         current = int(response.meta["current"])
         imageurl = response.xpath('//div[@class="main-image"]/p/a/img/@src').extract()[0]
-
+        #print('22222222222222222222222222222222' + imageurl)
         item = MzituItem()
         item["mzi_name"] = item_detail["mzi_name"]
         item["mzi_link"] = item_detail["mzi_link"]
